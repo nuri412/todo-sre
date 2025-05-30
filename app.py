@@ -2,28 +2,39 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# in-memory bd
-todos = []
+# Примерная база данных концертов
+concerts = [
+    {'id': 1, 'name': 'Imagine Dragons', 'available_tickets': 50},
+    {'id': 2, 'name': 'Coldplay', 'available_tickets': 100}
+]
 
-@app.route('/todos', methods=['GET'])
-def get_todos():
-    return jsonify(todos)
+# Получить список всех концертов
+@app.route('/concerts', methods=['GET'])
+def list_concerts():
+    return jsonify(concerts)
 
-@app.route('/todos', methods=['POST'])
-def add_todo():
+# Купить билет
+@app.route('/buy', methods=['POST'])
+def buy_ticket():
     data = request.get_json()
-    todo = {
-        'id': len(todos) + 1,
-        'task': data.get('task', '')
-    }
-    todos.append(todo)
-    return jsonify(todo), 201
+    concert_id = data.get('concert_id')
+    quantity = data.get('quantity', 1)
 
-@app.route('/todos/<int:todo_id>', methods=['DELETE'])
-def delete_todo(todo_id):
-    global todos
-    todos = [t for t in todos if t['id'] != todo_id]
-    return jsonify({'message': 'Deleted'}), 200
+    for concert in concerts:
+        if concert['id'] == concert_id:
+            if concert['available_tickets'] >= quantity:
+                concert['available_tickets'] -= quantity
+                return jsonify({'message': 'Tickets purchased successfully'}), 200
+            else:
+                return jsonify({'error': 'Not enough tickets'}), 400
 
+    return jsonify({'error': 'Concert not found'}), 404
+
+# Домашняя страница
+@app.route('/')
+def home():
+    return "🎫 Welcome to the Concert Ticket API! Visit /concerts to browse shows."
+
+# Запуск сервера
 if __name__ == '__main__':
     app.run(debug=True)
