@@ -2,3 +2,5 @@ Flask==2.2.5
 pytest==8.3.5
 werkzeug==2.3.8
 locust
+prometheus-flask-exporter==0.22.3
+prometheus-client==0.17.1
